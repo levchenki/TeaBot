@@ -25,7 +25,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 @AllArgsConstructor
 public class DialogHandler {
 
-  private final int MAX_TEX_LEN = 255;
+  private final int MAX_TEXT_LEN = 255;
   TeaService teaService;
   UserService userService;
   EvaluationService evaluationService;
@@ -72,7 +72,7 @@ public class DialogHandler {
         editMessageText.setText("Введите комментарий");
 
         sendMessage.setText(
-            "Комментарий не может превышать " + MAX_TEX_LEN + " символов.\nВведите комментарий");
+            "Комментарий не может превышать " + MAX_TEXT_LEN + " символов.\nВведите комментарий");
         redisService.setToHash(evaluatingKey, "editMessageId", nextMessageId);
         return new MethodWrapper(editMessageText, sendMessage);
       }
@@ -126,17 +126,21 @@ public class DialogHandler {
     redisService.setToHash(creatingKey, "editMessageId", nextMessageId);
 
     if (redisService.isEmpty(creatingKey, "name")) {
-      if (isInvalidText(messageText)) {
+      editMessageText.setText("Введите название чая");
 
-        editMessageText.setText("Введите название чая");
+      if (isTeaExists(messageText)) {
+        sendMessage.setText(
+            "Такой чай уже существует.\nВведите название чая");
+
+        return new MethodWrapper(editMessageText, sendMessage);
+      } else if (isInvalidText(messageText)) {
 
         sendMessage.setText(
-            "Название не может превышать " + MAX_TEX_LEN + " символов.\nВведите название чая");
+            "Название не может превышать " + MAX_TEXT_LEN + " символов.\nВведите название чая");
 
         return new MethodWrapper(editMessageText, sendMessage);
       }
 
-      editMessageText.setText("Введите название чая");
       sendMessage.setText("Введите стоимость чая");
 
       redisService.setToHash(creatingKey, "name", messageText);
@@ -158,7 +162,7 @@ public class DialogHandler {
       if (isInvalidText(messageText)) {
         editMessageText.setText("Введите стоимость чая");
         sendMessage.setText(
-            "Описание не может превышать " + MAX_TEX_LEN + " символов.\nВведите описание");
+            "Описание не может превышать " + MAX_TEXT_LEN + " символов.\nВведите описание");
 
         return new MethodWrapper(editMessageText, sendMessage);
       }
@@ -196,6 +200,7 @@ public class DialogHandler {
 
     SendMessage sendMessage = new SendMessage();
     sendMessage.setChatId(userId);
+    sendMessage.setReplyMarkup(cancelKeyboard);
 
     EditMessageText editMessageText = new EditMessageText();
     editMessageText.setChatId(userId);
@@ -212,10 +217,15 @@ public class DialogHandler {
     switch (editedValue) {
       case EDIT_NAME -> {
         editMessageText.setText("Изменение чая \"" + tea.getName() + "\". Введите новое название");
-        if (isInvalidText(messageText)) {
+
+        if (isTeaExists(messageText)) {
           sendMessage.setText(
-              "Название не может превышать " + MAX_TEX_LEN + " символов.\nВведите новое название");
-          sendMessage.setReplyMarkup(cancelKeyboard);
+              "Такой чай уже существует.\nВведите новое название");
+
+          return new MethodWrapper(editMessageText, sendMessage);
+        } else if (isInvalidText(messageText)) {
+          sendMessage.setText(
+              "Название не может превышать " + MAX_TEXT_LEN + " символов.\nВведите новое название");
         } else {
           tea.setName(messageText);
           teaService.saveTea(tea);
@@ -233,7 +243,6 @@ public class DialogHandler {
           sendMessage.setReplyMarkup(getBackToEvaluatingTeaKeyboard);
         } else {
           sendMessage.setText("Введите валидную стоимость чая");
-          sendMessage.setReplyMarkup(cancelKeyboard);
         }
         return new MethodWrapper(editMessageText, sendMessage);
       }
@@ -241,8 +250,7 @@ public class DialogHandler {
         editMessageText.setText("Изменение чая \"" + tea.getName() + "\". Введите новое описание");
         if (isInvalidText(messageText)) {
           sendMessage.setText(
-              "Описание не может превышать " + MAX_TEX_LEN + " символов.\nВведите новое описание");
-          sendMessage.setReplyMarkup(cancelKeyboard);
+              "Описание не может превышать " + MAX_TEXT_LEN + " символов.\nВведите новое описание");
         } else {
           tea.setDescription(messageText);
           teaService.saveTea(tea);
@@ -311,11 +319,19 @@ public class DialogHandler {
   }
 
   private boolean isInvalidText(String messageText) {
-    return messageText.length() > MAX_TEX_LEN;
+    return messageText.length() > MAX_TEXT_LEN;
+  }
+
+  private boolean isValidText(String messageText) {
+    return messageText.length() <= MAX_TEXT_LEN;
   }
 
   private boolean isValidRating(String messageText) {
     return messageText.matches("\\d+[.,]?\\d{0,2}") && (Float.parseFloat(messageText) >= 1
         && Float.parseFloat(messageText) <= 10);
+  }
+
+  private boolean isTeaExists(String messageText) {
+    return isValidText(messageText) && teaService.isTeaExists(messageText);
   }
 }

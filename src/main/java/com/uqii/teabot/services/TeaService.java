@@ -42,9 +42,6 @@ public class TeaService {
     return teaRepository.countByCategory(category);
   }
 
-  public long getAllCount() {
-    return teaRepository.count();
-  }
 
   @Transactional
   public void saveTea(Tea tea) {
@@ -54,5 +51,9 @@ public class TeaService {
   @Transactional
   public void deleteTea(long teaId) {
     teaRepository.deleteById(teaId);
+  }
+
+  public boolean isTeaExists(String name) {
+    return teaRepository.existsByNameIgnoreCase(name);
   }
 }

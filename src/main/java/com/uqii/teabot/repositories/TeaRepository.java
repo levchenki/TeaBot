@@ -13,4 +13,6 @@ public interface TeaRepository extends JpaRepository<Tea, Long> {
   Page<Tea> findAllByCategoryOrderByNameAsc(Category category, Pageable pageable);
 
   long countByCategory(Category category);
+
+  boolean existsByNameIgnoreCase(String name);
 }

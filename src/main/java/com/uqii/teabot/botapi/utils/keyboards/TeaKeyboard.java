@@ -52,7 +52,7 @@ public class TeaKeyboard {
 
     String backCallbackData = categoryService.isSubcategory(category)
         ? CallbackQueryType.CATEGORY.toString() + Category.OOLONG + CallbackQueryAction.GET
-        :  prefix + CallbackQueryAction.BACK_TO_CATEGORY;
+        : prefix + CallbackQueryAction.BACK_TO_CATEGORY;
     keyboard.add(buttonsBuilder.getBackButton(backCallbackData));
     return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
   }
@@ -81,7 +81,8 @@ public class TeaKeyboard {
       keyboard.add(List.of(buttonEdit, buttonDelete));
     }
 
-    String backCallbackData = prefix + category.name() + CallbackQueryAction.PAGE + pageOfCurrentTea;
+    String backCallbackData =
+        prefix + category.name() + CallbackQueryAction.PAGE + pageOfCurrentTea;
     keyboard.add(buttonsBuilder.getBackButton(backCallbackData));
     return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
   }
