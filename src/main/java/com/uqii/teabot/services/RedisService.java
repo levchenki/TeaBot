@@ -1,5 +1,6 @@
 package com.uqii.teabot.services;
 
+import java.util.NoSuchElementException;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,7 +21,12 @@ public class RedisService {
   }
 
   public String getFromHash(String key, Object hashKey) {
-    return (String) redisTemplate.opsForHash().get(key, hashKey);
+    Object value = redisTemplate.opsForHash().get(key, hashKey);
+    if (value == null) {
+      throw new NoSuchElementException(
+          "key \"" + key + "\" doesn't have value for \"" + hashKey + "\"");
+    }
+    return (String) value;
   }
 
   public boolean isEmpty(String key, Object hashKey) {

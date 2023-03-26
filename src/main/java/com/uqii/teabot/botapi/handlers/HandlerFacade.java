@@ -136,6 +136,7 @@ public class HandlerFacade {
 
   public MethodWrapper evaluateTea(EditMessageText editMessageText, Long userId, Long teaId,
       int pageOfCurrentTea) {
+    redisService.clearUserCache(userId);
     InlineKeyboardMarkup cancelKeyboard = teaKeyboard.getBackToTeaKeyboard(teaId, "Отмена",
         pageOfCurrentTea);
     userService.setUserState(userId, UserState.EVALUATING_TEA);
