@@ -43,7 +43,6 @@ public class TeaKeyboard {
         buttonsInRow, page);
 
     keyboard.add(buttonsBuilder.getPaginationButtons(page, pageCount, prefix, category));
-
     if (isAdmin) {
       InlineKeyboardButton buttonAdd = buttonsBuilder.getButton("Добавить",
           prefix + category.name() + CallbackQueryAction.CREATE);
@@ -53,7 +52,10 @@ public class TeaKeyboard {
     String backCallbackData = categoryService.isSubcategory(category)
         ? CallbackQueryType.CATEGORY.toString() + Category.OOLONG + CallbackQueryAction.GET
         : prefix + CallbackQueryAction.BACK_TO_CATEGORY;
-    keyboard.add(buttonsBuilder.getBackButton(backCallbackData));
+    String backButtonText = "Назад";
+    InlineKeyboardButton backButton = buttonsBuilder.getButton(backButtonText, backCallbackData);
+
+    keyboard.add(List.of(backButton));
     return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
   }
 
@@ -83,7 +85,10 @@ public class TeaKeyboard {
 
     String backCallbackData =
         prefix + category.name() + CallbackQueryAction.PAGE + pageOfCurrentTea;
-    keyboard.add(buttonsBuilder.getBackButton(backCallbackData));
+    String backButtonText = "Назад";
+    InlineKeyboardButton backButton = buttonsBuilder.getButton(backButtonText, backCallbackData);
+
+    keyboard.add(List.of(backButton));
     return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
   }
 
@@ -122,7 +127,9 @@ public class TeaKeyboard {
     List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
     String backCallbackData = prefix + teaId + CallbackQueryAction.GET + ":" + pageOfCurrentTea;
-    keyboard.add(buttonsBuilder.getBackButton(backCallbackData, backButtonText));
+    InlineKeyboardButton backButton = buttonsBuilder.getButton(backButtonText, backCallbackData);
+
+    keyboard.add(List.of(backButton));
     return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
   }
 
@@ -131,7 +138,9 @@ public class TeaKeyboard {
 
     String backCallbackData =
         CallbackQueryType.CATEGORY + category.name() + CallbackQueryAction.GET;
-    keyboard.add(buttonsBuilder.getBackButton(backCallbackData, backButtonText));
+    InlineKeyboardButton backButton = buttonsBuilder.getButton(backButtonText, backCallbackData);
+
+    keyboard.add(List.of(backButton));
     return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
   }
 
@@ -142,7 +151,9 @@ public class TeaKeyboard {
     String backCallbackData =
         CallbackQueryType.CATEGORY + category.name() + CallbackQueryAction.GET + ":"
             + pageOfCurrentTea;
-    keyboard.add(buttonsBuilder.getBackButton(backCallbackData, backButtonText));
+    InlineKeyboardButton backButton = buttonsBuilder.getButton(backButtonText, backCallbackData);
+
+    keyboard.add(List.of(backButton));
     return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
   }
 
@@ -171,7 +182,9 @@ public class TeaKeyboard {
     keyboard.add(List.of(editDescriptionButton));
 
     String backCallbackData = prefix + teaId + CallbackQueryAction.GET + ":" + pageOfCurrentTea;
-    keyboard.add(buttonsBuilder.getBackButton(backCallbackData, backButtonText));
+    InlineKeyboardButton backButton = buttonsBuilder.getButton(backButtonText, backCallbackData);
+
+    keyboard.add(List.of(backButton));
     return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
   }
 
@@ -182,6 +195,7 @@ public class TeaKeyboard {
     InlineKeyboardButton buttonEdit = buttonsBuilder
         .getButton(backButtonText,
             prefix + teaId + CallbackQueryAction.EDIT + ":" + pageOfCurrentTea);
+
     keyboard.add(List.of(buttonEdit));
     return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
   }

@@ -27,12 +27,16 @@ public class CategoryKeyboard {
 
   public InlineKeyboardMarkup getAllSubcategoriesKeyboard() {
     int buttonsInRow = 1;
-    String backCallbackData =
-        CallbackQueryType.CATEGORY.toString() + CallbackQueryAction.BACK_TO_CATEGORY;
 
     List<Category> subcategories = categoryService.getSubcategories();
     List<List<InlineKeyboardButton>> keyboard = getInitializedKeyboard(subcategories, buttonsInRow);
-    keyboard.add(buttonsBuilder.getBackButton(backCallbackData));
+
+    String backCallbackData =
+        CallbackQueryType.CATEGORY.toString() + CallbackQueryAction.BACK_TO_CATEGORY;
+    String backButtonText = "Назад";
+    InlineKeyboardButton backButton = buttonsBuilder.getButton(backButtonText, backCallbackData);
+
+    keyboard.add(List.of(backButton));
     return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
   }
 

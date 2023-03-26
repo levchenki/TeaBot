@@ -31,13 +31,6 @@ public class ButtonsBuilder {
     return navigateRows;
   }
 
-  public List<InlineKeyboardButton> getBackButton(String callbackData, String text) {
-    return List.of(getButton(text, callbackData));
-  }
-
-  public List<InlineKeyboardButton> getBackButton(String callbackData) {
-    return List.of(getButton("Назад", callbackData));
-  }
 
   public InlineKeyboardButton getButton(String text, String callbackData) {
     return InlineKeyboardButton.builder().text(text).callbackData(callbackData).build();
