@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class UserService {
 
-  UserRepository userRepository;
+  private final UserRepository userRepository;
 
   public Optional<User> getUser(Long userId) {
     return userRepository.findById(userId);

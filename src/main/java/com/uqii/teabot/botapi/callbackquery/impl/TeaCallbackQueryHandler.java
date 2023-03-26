@@ -2,10 +2,11 @@ package com.uqii.teabot.botapi.callbackquery.impl;
 
 import com.uqii.teabot.botapi.MethodWrapper;
 import com.uqii.teabot.botapi.callbackquery.CallbackQueryHandler;
-import com.uqii.teabot.botapi.callbackquery.enums.CallbackQueryAction;
-import com.uqii.teabot.botapi.callbackquery.enums.CallbackQueryEditedValue;
-import com.uqii.teabot.botapi.callbackquery.enums.CallbackQueryType;
 import com.uqii.teabot.botapi.handlers.HandlerFacade;
+import com.uqii.teabot.botapi.utils.enums.CallbackQueryAction;
+import com.uqii.teabot.botapi.utils.enums.CallbackQueryEditedValue;
+import com.uqii.teabot.botapi.utils.enums.CallbackQueryType;
+import com.uqii.teabot.botapi.utils.enums.SkippedValue;
 import com.uqii.teabot.exceptions.UnknownCallbackQueryException;
 import com.uqii.teabot.models.Category;
 import com.uqii.teabot.services.RedisService;
@@ -29,8 +30,6 @@ public class TeaCallbackQueryHandler implements CallbackQueryHandler {
     String[] splittedCallback = rawData.split(":");
     Integer messageId = callbackQuery.getMessage().getMessageId();
     Long userId = callbackQuery.getFrom().getId();
-
-    redisService.clearUserCache(userId);
 
     CallbackQueryAction action = CallbackQueryAction.valueOf(splittedCallback[2]);
 
@@ -85,6 +84,16 @@ public class TeaCallbackQueryHandler implements CallbackQueryHandler {
         } else {
           // TEA:{id}:EDIT:{page}
           return handlerFacade.editTea(editMessageText, userId, teaId, pageOfCurrentTea);
+        }
+      }
+      case SKIP_VALUE -> {
+        //TEA:{id}:SKIP_VALUE:{value}:{page}
+        Long teaId = Long.valueOf(splittedCallback[1]);
+        SkippedValue skippedValue = SkippedValue.valueOf(splittedCallback[3]);
+        int pageOfCurrentTea = Integer.parseInt(splittedCallback[4]);
+
+        if (skippedValue == SkippedValue.RATE_COMMENT) {
+          return handlerFacade.skipRateComment(editMessageText, userId, teaId, pageOfCurrentTea);
         }
       }
     }

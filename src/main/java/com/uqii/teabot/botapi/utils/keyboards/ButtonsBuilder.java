@@ -1,6 +1,6 @@
 package com.uqii.teabot.botapi.utils.keyboards;
 
-import com.uqii.teabot.botapi.callbackquery.enums.CallbackQueryAction;
+import com.uqii.teabot.botapi.utils.enums.CallbackQueryAction;
 import com.uqii.teabot.models.Category;
 import java.util.ArrayList;
 import java.util.List;

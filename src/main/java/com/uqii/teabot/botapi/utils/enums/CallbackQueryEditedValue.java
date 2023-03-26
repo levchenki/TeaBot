@@ -1,4 +1,4 @@
-package com.uqii.teabot.botapi.callbackquery.enums;
+package com.uqii.teabot.botapi.utils.enums;
 
 public enum CallbackQueryEditedValue {
   EDIT_NAME(":EDIT_NAME"),

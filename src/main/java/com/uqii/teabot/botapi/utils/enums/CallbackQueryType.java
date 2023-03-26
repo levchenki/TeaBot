@@ -1,4 +1,4 @@
-package com.uqii.teabot.botapi.callbackquery.enums;
+package com.uqii.teabot.botapi.utils.enums;
 
 public enum CallbackQueryType {
   CATEGORY("CATEGORY:"),

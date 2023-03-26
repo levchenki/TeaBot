@@ -1,7 +1,7 @@
 package com.uqii.teabot.botapi.callbackquery;
 
 import com.uqii.teabot.botapi.MethodWrapper;
-import com.uqii.teabot.botapi.callbackquery.enums.CallbackQueryType;
+import com.uqii.teabot.botapi.utils.enums.CallbackQueryType;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 
 public interface CallbackQueryHandler {

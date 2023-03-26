@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class TeaService {
 
-  TeaRepository teaRepository;
+  private final TeaRepository teaRepository;
 
   public Optional<Tea> getTea(Long teaId) {
     return teaRepository.findById(teaId);

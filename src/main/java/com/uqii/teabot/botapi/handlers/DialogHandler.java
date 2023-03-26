@@ -1,13 +1,12 @@
 package com.uqii.teabot.botapi.handlers;
 
 import com.uqii.teabot.botapi.MethodWrapper;
-import com.uqii.teabot.botapi.callbackquery.enums.CallbackQueryEditedValue;
+import com.uqii.teabot.botapi.utils.enums.CallbackQueryEditedValue;
+import com.uqii.teabot.botapi.utils.enums.SkippedValue;
 import com.uqii.teabot.botapi.utils.keyboards.CategoryKeyboard;
 import com.uqii.teabot.botapi.utils.keyboards.TeaKeyboard;
 import com.uqii.teabot.models.Category;
-import com.uqii.teabot.models.Evaluation;
 import com.uqii.teabot.models.Tea;
-import com.uqii.teabot.models.User;
 import com.uqii.teabot.models.UserState;
 import com.uqii.teabot.services.EvaluationService;
 import com.uqii.teabot.services.RedisService;
@@ -39,8 +38,14 @@ public class DialogHandler {
     int pageOfCurrentTea = Integer.parseInt(redisService.getFromHash(evaluatingKey, "page"));
     int editMessageId = Integer.parseInt(redisService.getFromHash(evaluatingKey, "editMessageId"));
 
+    String cachedRating = "rating";
+    String cachedComment = "comment";
+
     InlineKeyboardMarkup cancelKeyboard = teaKeyboard.getBackToTeaKeyboard(teaId, "Отмена",
         pageOfCurrentTea);
+    InlineKeyboardMarkup getBackToTeaOrContinueKeyboard = teaKeyboard.getBackToTeaOrContinueKeyboard(
+        teaId, "Отмена",
+        pageOfCurrentTea, SkippedValue.RATE_COMMENT);
     InlineKeyboardMarkup getBackToTeaKeyboard = teaKeyboard.getBackToTeaKeyboard(teaId, "Назад",
         pageOfCurrentTea);
 
@@ -56,13 +61,14 @@ public class DialogHandler {
     int nextMessageId = message.getMessageId() + 1;
     redisService.setToHash(evaluatingKey, "editMessageId", nextMessageId);
 
-    if (redisService.isEmpty(evaluatingKey, "rating")) {
+    if (redisService.isEmpty(evaluatingKey, cachedRating)) {
       String replaced = messageText.replace(",", ".");
       if (isValidRating(replaced)) {
-        redisService.setToHash(evaluatingKey, "rating", replaced);
+        redisService.setToHash(evaluatingKey, cachedRating, replaced);
 
         editMessageText.setText("Введите число от 1 до 10");
         sendMessage.setText("Введите комментарий");
+        sendMessage.setReplyMarkup(getBackToTeaOrContinueKeyboard);
       } else {
         editMessageText.setText("Введите число от 1 до 10");
         sendMessage.setText("Ошибка! Введите число от 1 до 10");
@@ -73,29 +79,20 @@ public class DialogHandler {
 
         sendMessage.setText(
             "Комментарий не может превышать " + MAX_TEXT_LEN + " символов.\nВведите комментарий");
+        sendMessage.setReplyMarkup(getBackToTeaOrContinueKeyboard);
         redisService.setToHash(evaluatingKey, "editMessageId", nextMessageId);
         return new MethodWrapper(editMessageText, sendMessage);
       }
-      redisService.setToHash(evaluatingKey, "comment", messageText);
+      redisService.setToHash(evaluatingKey, cachedComment, messageText);
 
       editMessageText.setText("Введите комментарий");
       sendMessage.setText("Оценка поставлена!");
       sendMessage.setReplyMarkup(getBackToTeaKeyboard);
 
-      String comment = redisService.getFromHash(evaluatingKey, "comment");
-      Double rating = Double.valueOf(redisService.getFromHash(evaluatingKey, "rating"));
+      String comment = redisService.getFromHash(evaluatingKey, cachedComment);
+      Double rating = Double.valueOf(redisService.getFromHash(evaluatingKey, cachedRating));
 
-      evaluationService.getEvaluation(userId, teaId).ifPresentOrElse((evaluation -> {
-        evaluation.setComment(comment);
-        evaluation.setRating(rating);
-        evaluationService.saveEvaluation(evaluation);
-      }), () -> {
-        User user = userService.getUser(userId)
-            .orElseThrow(() -> new NoSuchElementException("No user with id " + userId));
-        Tea tea = teaService.getTea(teaId)
-            .orElseThrow(() -> new NoSuchElementException("No tea with id " + teaId));
-        evaluationService.saveEvaluation(new Evaluation(rating, comment, tea, user));
-      });
+      evaluationService.createOrUpdateEvaluation(userId, teaId, rating, comment);
 
       redisService.removeKey(evaluatingKey);
       userService.setUserState(userId, UserState.GET_TEA);
@@ -300,7 +297,6 @@ public class DialogHandler {
       userService.setUserState(userId, UserState.GET_CATEGORY);
       redisService.removeKey(deletingKey);
 
-      return new MethodWrapper(editMessageText, sendMessage);
     } else {
       editMessageText.setText(
           "Удаление чая \"" + tea.getName() + "\". Напишите название чая для подтверждения");
@@ -309,8 +305,8 @@ public class DialogHandler {
       sendMessage.setReplyMarkup(cancelKeyboard);
 
       redisService.setToHash(deletingKey, "editMessageId", nextMessageId);
-      return new MethodWrapper(editMessageText, sendMessage);
     }
+    return new MethodWrapper(editMessageText, sendMessage);
   }
 
   private boolean isValidPrice(String messageText) {

@@ -1,7 +1,7 @@
 package com.uqii.teabot.botapi.handlers;
 
 import com.uqii.teabot.botapi.MethodWrapper;
-import com.uqii.teabot.botapi.callbackquery.enums.CallbackQueryEditedValue;
+import com.uqii.teabot.botapi.utils.enums.CallbackQueryEditedValue;
 import com.uqii.teabot.botapi.utils.keyboards.CategoryKeyboard;
 import com.uqii.teabot.botapi.utils.keyboards.TeaKeyboard;
 import com.uqii.teabot.models.Category;
@@ -34,6 +34,7 @@ public class HandlerFacade {
   TeaKeyboard teaKeyboard;
 
   public MethodWrapper getCategories(EditMessageText editMessageText, Long userId) {
+    redisService.clearUserCache(userId);
     InlineKeyboardMarkup categoriesKeyboard = categoryKeyboard.getAllCategoriesKeyboard();
     userService.setUserState(userId, UserState.GET_CATEGORIES);
 
@@ -43,6 +44,7 @@ public class HandlerFacade {
   }
 
   public MethodWrapper getSubcategories(EditMessageText editMessageText, Long userId) {
+    redisService.clearUserCache(userId);
     InlineKeyboardMarkup subcategoriesKeyboard = categoryKeyboard.getAllSubcategoriesKeyboard();
     userService.setUserState(userId, UserState.GET_CATEGORIES);
 
@@ -54,6 +56,7 @@ public class HandlerFacade {
 
   public MethodWrapper getCategory(EditMessageText editMessageText, Long userId, Category category,
       int page) {
+    redisService.clearUserCache(userId);
     boolean isAdmin = userService.isUserAdmin(userId);
 
     InlineKeyboardMarkup allTeaKeyboard = teaKeyboard.getOneCategoryKeyboard(userId, category, page,
@@ -148,6 +151,7 @@ public class HandlerFacade {
   }
 
   public MethodWrapper createTea(EditMessageText editMessageText, Long userId, Category category) {
+    redisService.clearUserCache(userId);
     InlineKeyboardMarkup cancelKeyboard = teaKeyboard.getBackToCategoryKeyboard(category, "Отмена");
     userService.setUserState(userId, UserState.CREATING_TEA);
 
@@ -162,6 +166,7 @@ public class HandlerFacade {
 
   public MethodWrapper deleteTea(EditMessageText editMessageText, Long userId, Long teaId,
       int pageOfCurrentTea) {
+    redisService.clearUserCache(userId);
     InlineKeyboardMarkup cancelKeyboard = teaKeyboard.getBackToTeaKeyboard(teaId, "Отмена",
         pageOfCurrentTea);
     userService.setUserState(userId, UserState.DELETING_TEA);
@@ -182,6 +187,7 @@ public class HandlerFacade {
 
   public MethodWrapper editTea(EditMessageText editMessageText, Long userId, Long teaId,
       int pageOfCurrentTea) {
+    redisService.clearUserCache(userId);
     InlineKeyboardMarkup evaluatingTeaKeyboard = teaKeyboard.getEvaluatingTeaKeyboard(teaId,
         "Назад", pageOfCurrentTea);
     userService.setUserState(userId, UserState.EDITING_TEA);
@@ -196,6 +202,7 @@ public class HandlerFacade {
 
   public MethodWrapper editTeaValues(EditMessageText editMessageText, Long userId, Long teaId,
       int pageOfCurrentTea, CallbackQueryEditedValue editedValue) {
+    redisService.clearUserCache(userId);
     InlineKeyboardMarkup cancelKeyboard = teaKeyboard.getBackToEvaluatingTeaKeyboard(teaId,
         "Отмена", pageOfCurrentTea);
     Tea tea = teaService.getTea(teaId)
@@ -217,6 +224,28 @@ public class HandlerFacade {
     }
 
     editMessageText.setReplyMarkup(cancelKeyboard);
+    return new MethodWrapper(editMessageText);
+  }
+
+  public MethodWrapper skipRateComment(EditMessageText editMessageText, Long userId, Long teaId,
+      int pageOfCurrentTea) {
+    InlineKeyboardMarkup backToTeaKeyboard = teaKeyboard.getBackToTeaKeyboard(teaId, "Назад",
+        pageOfCurrentTea);
+    String evaluatingKey = redisService.getEvaluatingKey(userId);
+    String cachedRating = "rating";
+
+    Double rating = Double.valueOf(redisService.getFromHash(evaluatingKey, cachedRating));
+
+    String comment = "";
+
+    evaluationService.createOrUpdateEvaluation(userId, teaId, rating, comment);
+
+    redisService.removeKey(evaluatingKey);
+    userService.setUserState(userId, UserState.GET_TEA);
+
+    editMessageText.setText("Оценка поставлена");
+    editMessageText.setReplyMarkup(backToTeaKeyboard);
+
     return new MethodWrapper(editMessageText);
   }
 }

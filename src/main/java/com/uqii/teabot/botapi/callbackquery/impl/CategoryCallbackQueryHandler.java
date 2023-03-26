@@ -2,9 +2,9 @@ package com.uqii.teabot.botapi.callbackquery.impl;
 
 import com.uqii.teabot.botapi.MethodWrapper;
 import com.uqii.teabot.botapi.callbackquery.CallbackQueryHandler;
-import com.uqii.teabot.botapi.callbackquery.enums.CallbackQueryAction;
-import com.uqii.teabot.botapi.callbackquery.enums.CallbackQueryType;
 import com.uqii.teabot.botapi.handlers.HandlerFacade;
+import com.uqii.teabot.botapi.utils.enums.CallbackQueryAction;
+import com.uqii.teabot.botapi.utils.enums.CallbackQueryType;
 import com.uqii.teabot.exceptions.UnknownCallbackQueryException;
 import com.uqii.teabot.models.Category;
 import lombok.AllArgsConstructor;

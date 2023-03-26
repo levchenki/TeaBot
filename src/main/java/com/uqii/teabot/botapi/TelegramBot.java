@@ -51,7 +51,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     List<BotApiMethod<?>> methods = methodWrapper.getMethods();
     try {
       for (BotApiMethod<?> method : methods) {
-        execute(method);
+        executeAsync(method);
       }
     } catch (TelegramApiException e) {
       log.error(e);

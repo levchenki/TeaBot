@@ -1,4 +1,4 @@
-package com.uqii.teabot.botapi.callbackquery.enums;
+package com.uqii.teabot.botapi.utils.enums;
 
 public enum CallbackQueryAction {
   PAGE(":PAGE:"),
@@ -8,7 +8,8 @@ public enum CallbackQueryAction {
   RATE(":RATE"),
   EDIT(":EDIT"),
   DELETE(":DELETE"),
-  CREATE(":CREATE");
+  CREATE(":CREATE"),
+  SKIP_VALUE(":SKIP_VALUE:");
 
   private final String callback;
 

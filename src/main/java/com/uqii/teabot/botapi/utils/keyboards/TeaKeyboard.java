@@ -1,8 +1,9 @@
 package com.uqii.teabot.botapi.utils.keyboards;
 
-import com.uqii.teabot.botapi.callbackquery.enums.CallbackQueryAction;
-import com.uqii.teabot.botapi.callbackquery.enums.CallbackQueryEditedValue;
-import com.uqii.teabot.botapi.callbackquery.enums.CallbackQueryType;
+import com.uqii.teabot.botapi.utils.enums.CallbackQueryAction;
+import com.uqii.teabot.botapi.utils.enums.CallbackQueryEditedValue;
+import com.uqii.teabot.botapi.utils.enums.CallbackQueryType;
+import com.uqii.teabot.botapi.utils.enums.SkippedValue;
 import com.uqii.teabot.models.Category;
 import com.uqii.teabot.models.Evaluation;
 import com.uqii.teabot.models.Tea;
@@ -130,6 +131,23 @@ public class TeaKeyboard {
     InlineKeyboardButton backButton = buttonsBuilder.getButton(backButtonText, backCallbackData);
 
     keyboard.add(List.of(backButton));
+    return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
+  }
+
+  public InlineKeyboardMarkup getBackToTeaOrContinueKeyboard(Long teaId, String backButtonText,
+      int pageOfCurrentTea, SkippedValue skippedValue) {
+    List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+
+    String backCallbackData = prefix + teaId + CallbackQueryAction.GET + ":" + pageOfCurrentTea;
+    InlineKeyboardButton backButton = buttonsBuilder.getButton(backButtonText, backCallbackData);
+
+    String continueCallbackData =
+        prefix + teaId + CallbackQueryAction.SKIP_VALUE + skippedValue + ":" + pageOfCurrentTea;
+    String continueButtonText = "Продолжить";
+    InlineKeyboardButton continueButton = buttonsBuilder.getButton(continueButtonText,
+        continueCallbackData);
+
+    keyboard.add(List.of(backButton, continueButton));
     return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
   }
 
